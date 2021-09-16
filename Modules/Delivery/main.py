@@ -52,7 +52,7 @@ class Delivery:
 
 
 
-        delivery_info = delivery_info.query('delivery_overdue>=1 and delivery_overdue<1000')
+        delivery_info = delivery_info.query('delivery_overdue>=7 and delivery_overdue<1000')
 
         if(not delivery_info.empty):
             res = delivery_info[['delivery_overdue', 'delivery_date','delivery_date_end','chrt']]
