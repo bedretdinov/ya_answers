@@ -1,0 +1,17 @@
+numpy==1.18.2
+pandas==1.0.3
+pqdm==0.1.0
+python-telegram-bot==12.8
+requests==2.7.0
+scikit-learn==0.22.2.post1
+scipy==1.4.1
+sklearn==0.0
+telebot
+peewee
+pymysql
+infi.clickhouse_orm
+fastapi
+uvicorn[standard]
+autoload-module
+rpyc
+jinja2
