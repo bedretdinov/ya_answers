@@ -1,3 +1,5 @@
+import datetime
+
 from infi.clickhouse_orm import Database
 from infi.clickhouse_orm import Model,Float32Field,UInt32Field, Int32Field, StringField, DateField, DateTimeField , Float64Field, MergeTree, ReplacingMergeTree, UInt16Field, MergeTree, UInt64Field, NullableField,UInt8Field
 
@@ -23,6 +25,7 @@ class ClickHouse:
         text = StringField(default='')
         delivery_date = DateTimeField()
         delivery_overdue = Int32Field()
+        created_date = DateTimeField(default=datetime.datetime.now())
         date = DateField(materialized='toDate(delivery_date)')
 
         engine = MergeTree(partition_key=['date'], order_by=('delivery_date', ))
@@ -61,4 +64,4 @@ class ClickHouse:
     positionDB = clickHousePositionConnection()
     analytics = clickHouseConnection()
 
-    analytics.create_table([DeliveryOverdue])
+    analytics.create_table(DeliveryOverdue)
