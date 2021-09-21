@@ -59,3 +59,6 @@ class ClickHouse:
         )
 
     positionDB = clickHousePositionConnection()
+    analytics = clickHouseConnection()
+
+    analytics.create_table([DeliveryOverdue])
