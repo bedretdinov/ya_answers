@@ -1,48 +1,35 @@
 from typing import Optional
-
 import pandas as pd
 import uvicorn
-from fastapi import FastAPI
-from autoload import Modules
+from fastapi import Request, FastAPI,Form, Body
 import traceback
 import sys
 import sqlite3
 import datetime
+import json
+from transliterate import slugify
+from sqlalchemy import create_engine
+import pymysql
 
-logdb = sqlite3.connect('log.sqlite', check_same_thread=False)
+
 app = FastAPI()
 
-@app.get("/api/v1/send/")
-def detect_and_send( user_id:int, text: Optional[str] = None,  app: Optional[str] = None):
+@app.post("/api/v1/answers/save/")
+async def get_body(form_data : dict = Body()):
+    form_data['answers'] = json.loads(form_data['answers'])
+    df = pd.json_normalize(form_data)
 
-    try:
+    engine = create_engine('mysql+pymysql://dev:dev777@answersdb:3306/ya_answers', echo=False)
+    connection = engine.connect()
 
-        overdue_delivery = Modules.Delivery.check(user_id)
+    rename = {}
+    for c in df.columns:
+        if(slugify(c)!=None):
+            rename[c] = slugify(c).replace('-','_').replace('answers','answers_')
+    df.rename(columns=rename , inplace=True)
+    df.to_sql('form_answers', con=engine, if_exists = 'append', index=False)
 
-        if(overdue_delivery=={}):
-            return {"status": False}
-        else:
-
-            Modules.Telebot.sentDeliveryInfo(user_id, text, app, overdue_delivery)
-
-            return {"status":True,"items":overdue_delivery}
-
-    except:
-        etype, value, tb = sys.exc_info()
-        error = ''.join(traceback.format_exception(etype, value, tb, 100))
-
-        log = pd.DataFrame([
-            {'error':error, 'date':datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-        ])
-        log.to_sql('delivery_logs', if_exists='append',con=logdb)
-
-        return {"status": "error",'msg':error}
-
-
-
-
-
-
+    connection.close()
 
 if __name__ == '__main__':
-    uvicorn.run(app, port=4001, host='0.0.0.0')
+    uvicorn.run(app, port=8888, host='0.0.0.0')
